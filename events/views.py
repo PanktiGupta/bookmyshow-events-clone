@@ -1,10 +1,8 @@
 from django.shortcuts import render, redirect
-from .models import Event
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .serializers import EventSerializer
-from django.shortcuts import render
 from .models import Event
+from .serializers import EventSerializer
 
 def events_page(request):
     events = Event.objects.all()
