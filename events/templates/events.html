@@ -8,10 +8,27 @@
 
 <!-- FILTER -->
 <div class="mb-6 space-x-3">
-    <a href="/events/" class="bg-gray-200 px-3 py-1 rounded">All</a>
-    <a href="/events/?category=Music" class="bg-gray-200 px-3 py-1 rounded">Music</a>
-    <a href="/events/?category=Sports" class="bg-gray-200 px-3 py-1 rounded">Sports</a>
-    <a href="/events/?category=Comedy" class="bg-gray-200 px-3 py-1 rounded">Comedy</a>
+
+    <a href="/events/"
+       class="px-3 py-1 rounded {% if not request.GET.category %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
+       All
+    </a>
+
+    <a href="/events/?category=Music"
+       class="px-3 py-1 rounded {% if request.GET.category == 'Music' %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
+       Music
+    </a>
+
+    <a href="/events/?category=Sports"
+       class="px-3 py-1 rounded {% if request.GET.category == 'Sports' %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
+       Sports
+    </a>
+
+    <a href="/events/?category=Comedy"
+       class="px-3 py-1 rounded {% if request.GET.category == 'Comedy' %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
+       Comedy
+    </a>
+
 </div>
 
 <!-- GRID -->
@@ -20,15 +37,29 @@
 {% for event in events %}
 <div class="bg-white rounded shadow">
 
-    <img src="{{ event.image }}" class="h-40 w-full object-cover rounded-t">
+    <div class="bg-white rounded-xl shadow hover:shadow-xl transform hover:scale-105 transition duration-300">
+
+    <a href="/events/{{ event.id }}/">
+        <img src="{{ event.image }}" class="h-40 w-full object-cover rounded-t-xl">
+    </a>
 
     <div class="p-3">
+
         <h3 class="font-bold">{{ event.title }}</h3>
         <p class="text-gray-500">{{ event.date }}</p>
         <p class="text-gray-500">{{ event.location }}</p>
-        <p class="text-red-500">₹{{ event.price }}</p>
-        <p class="text-sm text-gray-400">{{ event.category }}</p>
+
+        <p class="text-red-500 font-semibold">₹{{ event.price }}</p>
+
+        <!-- Wishlist button -->
+        <a href="/wishlist/{{ event.id }}/"
+           class="inline-block mt-2 text-sm px-3 py-1 rounded
+           {% if event.id in wishlist %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
+           ❤️
+        </a>
+
     </div>
+</div>
 
 </div>
 {% endfor %}
