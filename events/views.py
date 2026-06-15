@@ -62,10 +62,13 @@ def _catalog_context(request, events):
     }
 
 
-def event_detail(request, id):
-    event = get_object_or_404(Event, id=id)
+def event_detail(request, event_id):
+    event = get_object_or_404(Event, id=event_id)
+
     wishlist = _wishlist(request)
-    similar_events = Event.objects.filter(category=event.category).exclude(id=event.pk)[:4]
+    similar_events = Event.objects.filter(
+        category=event.category
+    ).exclude(id=event.pk)[:4]
 
     return render(request, 'event_detail.html', {
         'event': event,

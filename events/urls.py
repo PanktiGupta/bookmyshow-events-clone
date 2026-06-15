@@ -5,8 +5,8 @@ from . import views
 urlpatterns = [
     path('', views.home, name='home'),
     path('events/', views.events_page, name='events'),
-    path('events/<int:id>/', views.event_detail, name='event_detail'),
-    path('events/<int:event_id>/book/', views.book_event, name='book_event'),
+    path('events/<int:event_id>/', views.event_detail, name='event_detail'),
+    path('events/<int:event_id>/', views.book_event, name='book_event'),
     path('booking/<int:booking_id>/success/', views.booking_success, name='booking_success'),
     path('wishlist/', views.wishlist_page, name='wishlist_page'),
     path('wishlist/<int:event_id>/', views.toggle_wishlist, name='wishlist'),
@@ -15,5 +15,4 @@ urlpatterns = [
     path('register/', views.register_view, name='register'),
     path('logout/', views.logout_view, name='logout'),
     path('bookings/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
-    path('api/events/', views.event_api, name='api'),
 ]
