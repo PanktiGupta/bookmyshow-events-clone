@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}Booking Confirmed - BookMyShowPro{% endblock %}
+
+{% block content %}
+<section class="success-card">
+    <p class="eyebrow">Booking confirmed</p>
+    <h1>Your tickets are reserved.</h1>
+    <div class="ticket">
+        <div>
+            <span>Event</span>
+            <strong>{{ booking.event.title }}</strong>
+        </div>
+        <div>
+            <span>Name</span>
+            <strong>{{ booking.customer_name }}</strong>
+        </div>
+        <div>
+            <span>Seats</span>
+            <strong>{{ booking.seats }}</strong>
+        </div>
+        <div>
+            <span>Total</span>
+            <strong>₹{{ booking.total_amount }}</strong>
+        </div>
+    </div>
+    <a class="btn" href="{% url 'events' %}">Book more events</a>
+</section>
+{% endblock %}

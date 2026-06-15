@@ -1,71 +1,99 @@
 {% extends 'base.html' %}
+{% block title %}Events - BookMyShowPro{% endblock %}
 
 {% block content %}
 
-<div class="p-6">
+<section class="page-header">
+    <p class="eyebrow">Event marketplace</p>
+    <h1>Explore all shows</h1>
+    <p>Filter by city, category and budget. Every listing is connected to detail pages, wishlist and booking.</p>
+</section>
 
-<h1 class="text-3xl font-bold mb-6">All Events</h1>
+<section class="catalog-layout">
+    <aside class="filters-panel">
+        <h2>Filters</h2>
+        <form method="get" action="{% url 'events' %}">
+            <label>
+                Search
+                <input name="q" value="{{ filters.query }}" placeholder="Event, venue, keyword">
+            </label>
 
-<!-- FILTER -->
-<div class="mb-6 space-x-3">
+            <label>
+                Category
+                <select name="category">
+                    <option value="">All categories</option>
+                    {% for key, label in categories %}
+                        <option value="{{ key }}" {% if filters.category == key %}selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-    <a href="/events/"
-       class="px-3 py-1 rounded {% if not request.GET.category %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
-       All
-    </a>
+            <label>
+                City
+                <select name="city">
+                    <option value="">All cities</option>
+                    {% for city in cities %}
+                        <option value="{{ city }}" {% if filters.city == city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </label>
 
-    <a href="/events/?category=Music"
-       class="px-3 py-1 rounded {% if request.GET.category == 'Music' %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
-       Music
-    </a>
+            <label>
+                Budget
+                <select name="price">
+                    <option value="">Any price</option>
+                    <option value="budget" {% if filters.price == 'budget' %}selected{% endif %}>Under ₹500</option>
+                    <option value="standard" {% if filters.price == 'standard' %}selected{% endif %}>₹500 - ₹1200</option>
+                    <option value="premium" {% if filters.price == 'premium' %}selected{% endif %}>Above ₹1200</option>
+                </select>
+            </label>
 
-    <a href="/events/?category=Sports"
-       class="px-3 py-1 rounded {% if request.GET.category == 'Sports' %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
-       Sports
-    </a>
+            <button class="btn" type="submit">Apply Filters</button>
+            <a class="btn secondary" href="{% url 'events' %}">Reset</a>
+        </form>
+    </aside>
 
-    <a href="/events/?category=Comedy"
-       class="px-3 py-1 rounded {% if request.GET.category == 'Comedy' %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
-       Comedy
-    </a>
+    <div class="catalog-results">
+        <div class="result-bar">
+            <strong>{{ events|length }} events found</strong>
+            <span>Sorted by upcoming date</span>
+        </div>
 
-</div>
-
-<!-- GRID -->
-<div class="grid grid-cols-2 md:grid-cols-4 gap-5">
-
-{% for event in events %}
-<div class="bg-white rounded shadow">
-
-    <div class="bg-white rounded-xl shadow hover:shadow-xl transform hover:scale-105 transition duration-300">
-
-    <a href="/events/{{ event.id }}/">
-        <img src="{{ event.image }}" class="h-40 w-full object-cover rounded-t-xl">
-    </a>
-
-    <div class="p-3">
-
-        <h3 class="font-bold">{{ event.title }}</h3>
-        <p class="text-gray-500">{{ event.date }}</p>
-        <p class="text-gray-500">{{ event.location }}</p>
-
-        <p class="text-red-500 font-semibold">₹{{ event.price }}</p>
-
-        <!-- Wishlist button -->
-        <a href="/wishlist/{{ event.id }}/"
-           class="inline-block mt-2 text-sm px-3 py-1 rounded
-           {% if event.id in wishlist %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
-           ❤️
-        </a>
-
+        <div class="event-grid">
+            {% for event in events %}
+                <article class="event-card">
+                    <a href="{% url 'event_detail' event.id %}" class="poster-wrap">
+                        <img src="{{ event.image_url }}" alt="{{ event.title }}">
+                        <span class="rating">{{ event.rating }} ★</span>
+                    </a>
+                    <div class="card-body">
+                        <div>
+                            <p class="chip">{{ event.category }}</p>
+                            <h3>{{ event.title }}</h3>
+                            <p class="muted">{{ event.venue }}, {{ event.city }}</p>
+                            <p class="muted">{{ event.language }} • {{ event.duration }}</p>
+                        </div>
+                        <div class="card-meta">
+                            <span>{{ event.date|date:"M d" }} • {{ event.time|time:"g:i A" }}</span>
+                            <strong>₹{{ event.price }}</strong>
+                        </div>
+                        <div class="seat-line">{{ event.seats_available }} seats available</div>
+                        <div class="card-actions">
+                            <a class="btn secondary" href="{% url 'wishlist' event.id %}">
+                                {% if event.id in wishlist %}Saved{% else %}Save{% endif %}
+                            </a>
+                            <a class="btn" href="{% url 'book_event' event.id %}">Book</a>
+                        </div>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="empty-state">
+                    <h2>No events match your filters</h2>
+                    <p>Try a different category, city or price range.</p>
+                </div>
+            {% endfor %}
+        </div>
     </div>
-</div>
-
-</div>
-{% endfor %}
-
-</div>
-
-</div>
+</section>
 
 {% endblock %}

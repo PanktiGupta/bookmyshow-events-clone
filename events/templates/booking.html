@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Book {{ event.title }} - BookMyShowPro{% endblock %}
+
+{% block content %}
+<section class="booking-layout">
+    <div class="booking-summary">
+        <img src="{{ event.image_url }}" alt="{{ event.title }}">
+        <div>
+            <p class="chip">{{ event.category }}</p>
+            <h1>{{ event.title }}</h1>
+            <p class="muted">{{ event.date|date:"M d, Y" }} • {{ event.time|time:"g:i A" }}</p>
+            <p class="muted">{{ event.venue }}, {{ event.city }}</p>
+            <strong>₹{{ event.price }} per ticket</strong>
+        </div>
+    </div>
+
+    <form class="booking-form" method="post">
+        {% csrf_token %}
+        <h2>Customer details</h2>
+        {% for field in form %}
+            <label>
+                {{ field.label }}
+                {{ field }}
+                {% if field.errors %}
+                    <span class="field-error">{{ field.errors|join:", " }}</span>
+                {% endif %}
+            </label>
+        {% endfor %}
+        <div class="price-note">Maximum 10 seats per booking. Available seats: {{ event.seats_available }}.</div>
+        <button class="btn" type="submit">Confirm booking</button>
+    </form>
+</section>
+{% endblock %}

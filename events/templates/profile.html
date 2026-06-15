@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% block title %}Profile - BookMyShowPro{% endblock %}
+
+{% block content %}
+<section class="profile-header">
+    <div>
+        <p class="eyebrow">My profile</p>
+        <h1>Hello, {{ request.user.username }}</h1>
+        <p>{{ request.user.email|default:"No email added" }}</p>
+    </div>
+    <a class="btn secondary" href="{% url 'logout' %}">Logout</a>
+</section>
+
+<section class="profile-stats">
+    <div><strong>{{ confirmed_bookings|length }}</strong><span>Booked shows</span></div>
+    <div><strong>₹{{ total_spent }}</strong><span>Transactions</span></div>
+    <div><strong>{{ cancelled_bookings|length }}</strong><span>Cancelled tickets</span></div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Tickets</p>
+            <h2>Booked shows</h2>
+        </div>
+    </div>
+
+    <div class="profile-list">
+        {% for booking in confirmed_bookings %}
+            <article class="booking-row">
+                <img src="{{ booking.event.image_url }}" alt="{{ booking.event.title }}">
+                <div>
+                    <h3>{{ booking.event.title }}</h3>
+                    <p class="muted">{{ booking.event.date|date:"M d, Y" }} • {{ booking.event.time|time:"g:i A" }}</p>
+                    <p class="muted">{{ booking.event.venue }}, {{ booking.event.city }}</p>
+                </div>
+                <div>
+                    <span class="status confirmed">{{ booking.get_status_display }}</span>
+                    <p>{{ booking.seats }} seat{{ booking.seats|pluralize }}</p>
+                </div>
+                <div>
+                    <strong>₹{{ booking.total_amount }}</strong>
+                    <p class="muted">{{ booking.transaction_id }}</p>
+                </div>
+                <a class="btn secondary" href="{% url 'cancel_booking' booking.id %}">Cancel</a>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <h2>No booked shows yet</h2>
+                <p>Book an event and it will appear here.</p>
+                <a class="btn" href="{% url 'events' %}">Explore events</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Payments</p>
+            <h2>Transaction history</h2>
+        </div>
+    </div>
+
+    <div class="transaction-table">
+        <div class="table-head">
+            <span>Transaction</span>
+            <span>Event</span>
+            <span>Date</span>
+            <span>Status</span>
+            <span>Amount</span>
+        </div>
+        {% for booking in bookings %}
+            <div class="table-row">
+                <span>{{ booking.transaction_id }}</span>
+                <span>{{ booking.event.title }}</span>
+                <span>{{ booking.booked_at|date:"M d, Y" }}</span>
+                <span>{{ booking.get_status_display }}</span>
+                <strong>₹{{ booking.total_amount }}</strong>
+            </div>
+        {% empty %}
+            <div class="empty-state">No transactions yet.</div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Cancelled</p>
+            <h2>Cancelled tickets</h2>
+        </div>
+    </div>
+
+    <div class="profile-list">
+        {% for booking in cancelled_bookings %}
+            <article class="booking-row">
+                <img src="{{ booking.event.image_url }}" alt="{{ booking.event.title }}">
+                <div>
+                    <h3>{{ booking.event.title }}</h3>
+                    <p class="muted">Cancelled on {{ booking.cancelled_at|date:"M d, Y" }}</p>
+                </div>
+                <span class="status cancelled">{{ booking.get_status_display }}</span>
+                <strong>₹{{ booking.total_amount }}</strong>
+            </article>
+        {% empty %}
+            <div class="empty-state">No cancelled tickets.</div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

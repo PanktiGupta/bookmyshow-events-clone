@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block title %}Wishlist - BookMyShowPro{% endblock %}
+
+{% block content %}
+<section class="page-header">
+    <p class="eyebrow">Saved events</p>
+    <h1>Your wishlist</h1>
+    <p>Keep track of shows you want to book later.</p>
+</section>
+
+<section class="section">
+    <div class="event-grid">
+        {% for event in events %}
+            <article class="event-card">
+                <a href="{% url 'event_detail' event.id %}" class="poster-wrap">
+                    <img src="{{ event.image_url }}" alt="{{ event.title }}">
+                    <span class="rating">{{ event.rating }} ★</span>
+                </a>
+                <div class="card-body">
+                    <p class="chip">{{ event.category }}</p>
+                    <h3>{{ event.title }}</h3>
+                    <p class="muted">{{ event.venue }}, {{ event.city }}</p>
+                    <div class="card-meta">
+                        <span>{{ event.date|date:"M d" }}</span>
+                        <strong>₹{{ event.price }}</strong>
+                    </div>
+                    <div class="card-actions">
+                        <a class="btn secondary" href="{% url 'wishlist' event.id %}">Remove</a>
+                        <a class="btn" href="{% url 'book_event' event.id %}">Book</a>
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="empty-state">
+                <h2>No saved events yet</h2>
+                <p>Explore events and save the ones you like.</p>
+                <a class="btn" href="{% url 'events' %}">Explore events</a>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

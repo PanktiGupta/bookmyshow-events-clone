@@ -1,80 +1,86 @@
 {% extends 'base.html' %}
+{% block title %}BookMyShowPro - Discover Events{% endblock %}
 {% block content %}
-<div class="max-w-7xl mx-auto mt-4">
+<section class="hero">
+  <div class="hero-content">
+    <p class="eyebrow">Movies, events, sports and shows</p>
+    <h1>Book tickets for the best experiences in your city.</h1>
+    <form class="hero-search" action="{% url 'events' %}" method="get">
+      <input name="q" value="{{ filters.query }}" placeholder="Try comedy, concert, cricket, theatre">
+      <select name="city">
+        <option value="">All cities</option>
+        {% for city in cities %}
+          <option value="{{ city }}" {% if filters.city == city %}selected{% endif %}>{{ city }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Explore</button>
+    </form>
+  </div>
+  <div class="hero-panel">
+    <span>Live now</span>
+    <strong>{{ events|length }}+</strong>
+    <p>Curated shows with wishlist, booking and API support.</p>
+  </div>
+</section>
 
-  <div class="relative overflow-hidden rounded-xl shadow-lg">
+<section class="stats-strip">
+  <div><strong>{{ events|length }}</strong><span>Events listed</span></div>
+  <div><strong>{{ bookings_count }}</strong><span>Bookings made</span></div>
+  <div><strong>₹{{ revenue }}</strong><span>Total revenue</span></div>
+</section>
 
-    <!-- Slides -->
-    <div class="flex transition-transform duration-700" id="carousel">
-
-      <img src="https://images.unsplash.com/photo-1514525253161-7a46d19cd819"
-           class="w-full h-64 object-cover">
-
-      <img src="https://images.unsplash.com/photo-1507874457470-272b3c8d8ee2"
-           class="w-full h-64 object-cover">
-
-      <img src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30"
-           class="w-full h-64 object-cover">
-
+<section class="section">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Featured</p>
+      <h2>Recommended Events</h2>
     </div>
-
+    <a class="text-link" href="{% url 'events' %}">View all</a>
   </div>
 
-</div>
-<!-- HERO BANNERS -->
-<div class="max-w-7xl mx-auto mt-4">
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-    <img src="https://source.unsplash.com/800x400/?concert"
-         alt="Concert"
-         class="rounded-xl hover:scale-105 transition duration-300">
-
-    <img src="https://source.unsplash.com/800x400/?festival"
-         alt="Festival"
-         class="rounded-xl hover:scale-105 transition duration-300">
-
-    <img src="https://source.unsplash.com/800x400/?stage"
-         alt="Stage"
-         class="rounded-xl hover:scale-105 transition duration-300">
-
-  </div>
-</div>
-
-<!-- RECOMMENDED -->
-<div class="max-w-7xl mx-auto mt-8 px-2">
-  <h2 class="text-2xl font-bold mb-4">Recommended Events</h2>
-
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5">
-
-    {% for event in events %}
-    <div class="bg-white rounded-xl shadow hover:shadow-xl transition duration-300">
-
-      <div class="relative">
-        <img src="{{ event.image }}"
-             class="rounded-t-xl h-48 w-full object-cover">
-
-        <!-- Wishlist -->
-        <a href="/wishlist/{{ event.id }}/"
-           class="absolute top-2 right-2 bg-white p-2 rounded-full shadow">
-          {% if event.id in wishlist %}
-            ❤️
-          {% else %}
-            🤍
-          {% endif %}
+  <div class="event-grid">
+    {% for event in featured_events %}
+      <article class="event-card">
+        <a href="{% url 'event_detail' event.id %}" class="poster-wrap">
+          <img src="{{ event.image_url }}" alt="{{ event.title }}">
+          <span class="rating">{{ event.rating }} ★</span>
         </a>
-      </div>
-
-      <div class="p-3">
-    <h3 class="font-semibold text-sm">{{ event.title }}</h3>
-    <p class="text-gray-500 text-xs">📅 {{ event.date }}</p>
-    <p class="text-gray-400 text-xs">📍 {{ event.location }}</p>
-    <p class="text-red-500 text-sm font-bold">₹{{ event.price }}</p>
-</div>
-
-    </div>
+        <div class="card-body">
+          <div>
+            <p class="chip">{{ event.category }}</p>
+            <h3>{{ event.title }}</h3>
+            <p class="muted">{{ event.venue }}, {{ event.city }}</p>
+          </div>
+          <div class="card-meta">
+            <span>{{ event.date|date:"M d" }} • {{ event.time|time:"g:i A" }}</span>
+            <strong>₹{{ event.price }}</strong>
+          </div>
+          <div class="card-actions">
+            <a class="btn secondary" href="{% url 'wishlist' event.id %}">
+              {% if event.id in wishlist %}Saved{% else %}Save{% endif %}
+            </a>
+            <a class="btn" href="{% url 'book_event' event.id %}">Book</a>
+          </div>
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty-state">No featured events yet. Add events from the admin panel.</p>
     {% endfor %}
-
   </div>
-</div>
+</section>
+
+<section class="section compact">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">Browse</p>
+      <h2>Popular Categories</h2>
+    </div>
+  </div>
+  <div class="category-row">
+    {% for key, label in categories %}
+      <a href="{% url 'events' %}?category={{ key }}">{{ label }}</a>
+    {% endfor %}
+  </div>
+</section>
 
 {% endblock %}

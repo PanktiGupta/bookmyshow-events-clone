@@ -1,24 +1,64 @@
 {% extends 'base.html' %}
+{% block title %}{{ event.title }} - BookMyShowPro{% endblock %}
 {% block content %}
 
-<div class="max-w-5xl mx-auto p-6">
+<section class="detail-hero">
+    <img src="{{ event.image_url }}" alt="{{ event.title }}">
+    <div class="detail-copy">
+        <p class="chip">{{ event.category }}</p>
+        <h1>{{ event.title }}</h1>
+        <p>{{ event.description }}</p>
+        <div class="detail-meta">
+            <span>{{ event.rating }} ★ rating</span>
+            <span>{{ event.language }}</span>
+            <span>{{ event.duration }}</span>
+        </div>
+        <div class="detail-actions">
+            <a class="btn" href="{% url 'book_event' event.id %}">Book tickets</a>
+            <a class="btn secondary" href="{% url 'wishlist' event.id %}">
+                {% if event.id in wishlist %}Saved{% else %}Add to wishlist{% endif %}
+            </a>
+        </div>
+    </div>
+</section>
 
-    <img src="{{ event.image }}" class="w-full h-80 object-cover rounded-xl mb-6">
+<section class="section detail-grid">
+    <div class="info-panel">
+        <h2>Show details</h2>
+        <dl>
+            <div><dt>Date</dt><dd>{{ event.date|date:"l, M d, Y" }}</dd></div>
+            <div><dt>Time</dt><dd>{{ event.time|time:"g:i A" }}</dd></div>
+            <div><dt>Venue</dt><dd>{{ event.venue }}</dd></div>
+            <div><dt>Address</dt><dd>{{ event.location }}, {{ event.city }}</dd></div>
+            <div><dt>Seats left</dt><dd>{{ event.seats_available }}</dd></div>
+        </dl>
+    </div>
 
-    <h1 class="text-3xl font-bold mb-2">{{ event.title }}</h1>
-    <p class="text-gray-500">{{ event.date }} | {{ event.location }}</p>
+    <div class="price-panel">
+        <p>Starting from</p>
+        <strong>₹{{ event.price }}</strong>
+        <a class="btn" href="{% url 'book_event' event.id %}">Continue</a>
+    </div>
+</section>
 
-    <p class="mt-4 text-lg">{{ event.description }}</p>
-
-    <p class="mt-4 text-2xl text-red-500 font-bold">₹{{ event.price }}</p>
-
-    <!-- Wishlist -->
-    <a href="/wishlist/{{ event.id }}/"
-       class="mt-4 inline-block px-4 py-2 rounded
-       {% if event.id in wishlist %}bg-red-500 text-white{% else %}bg-gray-200{% endif %}">
-       ❤️ Wishlist
-    </a>
-
-</div>
+{% if similar_events %}
+<section class="section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">More like this</p>
+            <h2>Similar events</h2>
+        </div>
+    </div>
+    <div class="mini-list">
+        {% for similar in similar_events %}
+            <a href="{% url 'event_detail' similar.id %}">
+                <img src="{{ similar.image_url }}" alt="{{ similar.title }}">
+                <span>{{ similar.title }}</span>
+                <strong>₹{{ similar.price }}</strong>
+            </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
 {% endblock %}
