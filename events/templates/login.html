@@ -2,30 +2,51 @@
 {% block title %}Login - BookMyShowPro{% endblock %}
 
 {% block content %}
-<section class="auth-layout">
-    <div class="auth-copy">
-        <p class="eyebrow">Welcome back</p>
-        <h1>Login to manage your tickets.</h1>
-        <p>View booked shows, transaction details, and cancelled tickets from one profile dashboard.</p>
+
+<section class="login-page">
+
+<div class="login-card">
+
+    <div class="login-header">
+        <h1>🎟️ BookMyShowPro</h1>
+        <p>Login to continue booking amazing events</p>
     </div>
 
-    <form class="auth-card" method="post">
+    {% if form.non_field_errors %}
+        <div class="field-error">
+            {{ form.non_field_errors|join:", " }}
+        </div>
+    {% endif %}
+
+    <form method="post">
         {% csrf_token %}
-        <h2>Login</h2>
-        {% if form.non_field_errors %}
-            <div class="field-error">{{ form.non_field_errors|join:", " }}</div>
-        {% endif %}
+
         {% for field in form %}
             <label>
                 {{ field.label }}
                 {{ field }}
+
                 {% if field.errors %}
-                    <span class="field-error">{{ field.errors|join:", " }}</span>
+                    <span class="field-error">
+                        {{ field.errors|join:", " }}
+                    </span>
                 {% endif %}
             </label>
         {% endfor %}
-        <button class="btn" type="submit">Login</button>
-        <p class="auth-note">New user? <a href="{% url 'register' %}">Create an account</a></p>
+
+        <button class="btn login-btn" type="submit">
+            Login
+        </button>
     </form>
+
+    <p class="auth-note">
+        Don't have an account?
+        <a href="{% url 'register' %}">
+            Register
+        </a>
+    </p>
+
+</div>
+
 </section>
 {% endblock %}

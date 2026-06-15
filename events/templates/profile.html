@@ -5,7 +5,7 @@
 <section class="profile-header">
     <div>
         <p class="eyebrow">My profile</p>
-        <h1>Hello, {{ request.user.username }}</h1>
+        <h3>Hello, {{ request.user.username }}</h3>
         <p>{{ request.user.email|default:"No email added" }}</p>
     </div>
     <a class="btn secondary" href="{% url 'logout' %}">Logout</a>
