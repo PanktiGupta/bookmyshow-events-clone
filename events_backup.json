@@ -1,0 +1,86 @@
+[
+{
+  "model": "events.event",
+  "pk": 5,
+  "fields": {
+    "title": "Arijit Singh Live Concert",
+    "image": "concert.jpg",
+    "date": "2026-05-10",
+    "time": "19:00:00",
+    "category": "Music",
+    "location": "Delhi",
+    "city": "Bhopal",
+    "venue": "Main Auditorium",
+    "price": 1499,
+    "seats_available": 100,
+    "rating": "4.5",
+    "language": "Hindi, English",
+    "duration": "2h 30m",
+    "is_featured": false,
+    "description": "Experience soulful music live with Arijit Singh"
+  }
+},
+{
+  "model": "events.event",
+  "pk": 6,
+  "fields": {
+    "title": "Stand-up Comedy Night",
+    "image": "comedy.jpg",
+    "date": "2026-05-15",
+    "time": "19:00:00",
+    "category": "Comedy",
+    "location": "Mumbai",
+    "city": "Bhopal",
+    "venue": "Main Auditorium",
+    "price": 499,
+    "seats_available": 100,
+    "rating": "4.5",
+    "language": "Hindi, English",
+    "duration": "2h 30m",
+    "is_featured": false,
+    "description": "Laugh out loud with top comedians"
+  }
+},
+{
+  "model": "events.event",
+  "pk": 7,
+  "fields": {
+    "title": "IPL Match Screening",
+    "image": "cricket.jpg",
+    "date": "2026-05-20",
+    "time": "19:00:00",
+    "category": "Sports",
+    "location": "Bangalore",
+    "city": "Bhopal",
+    "venue": "Main Auditorium",
+    "price": 299,
+    "seats_available": 100,
+    "rating": "4.5",
+    "language": "Hindi, English",
+    "duration": "2h 30m",
+    "is_featured": false,
+    "description": "Watch IPL with crowd energy"
+  }
+},
+{
+  "model": "events.event",
+  "pk": 8,
+  "fields": {
+    "title": "Tech Conference 2026",
+    "image": "tech.jpg",
+    "date": "2026-06-01",
+    "time": "19:00:00",
+    "category": "Tech",
+    "location": "Hyderabad",
+    "city": "Bhopal",
+    "venue": "Main Auditorium",
+    "price": 999,
+    "seats_available": 100,
+    "rating": "4.5",
+    "language": "Hindi, English",
+    "duration": "2h 30m",
+    "is_featured": false,
+    "description": "Explore latest innovations in tech"
+  }
+}
+]
