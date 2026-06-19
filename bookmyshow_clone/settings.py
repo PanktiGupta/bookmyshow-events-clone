@@ -20,11 +20,14 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 DEBUG = config("DEBUG", default=False, cast=bool)
-SECRET_KEY = config("SECRET_KEY")
+SECRET_KEY = config(
+    "SECRET_KEY",
+    default="django-insecure-local-dev-key"
+)
 STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
-
+STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 # Application definition
 
 INSTALLED_APPS = [
