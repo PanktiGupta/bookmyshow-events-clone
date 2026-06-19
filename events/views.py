@@ -1,3 +1,4 @@
+
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -5,13 +6,19 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q, Sum
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.conf import settings
+from django.core.cache import cache
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
-
-from .forms import BookingForm, RegisterForm
 from .models import Booking, Event
+from .forms import BookingForm, RegisterForm
+from django.contrib.auth import get_user_model
+from .utils import generate_otp, store_otp, set_resend_lock, can_resend
+from .utils import get_otp, delete_otp
 from .serializers import EventSerializer
-
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+User = get_user_model()
 
 def _wishlist(request):
     return [int(event_id) for event_id in request.session.get('wishlist', [])]
@@ -80,6 +87,10 @@ def event_detail(request, event_id):
 def events_page(request):
     events = _apply_filters(Event.objects.all(), _event_filters(request))
     return render(request, 'events.html', _catalog_context(request, events))
+
+def payment(request):
+    # my payment logic here
+    pass
 
 
 def home(request):
@@ -165,8 +176,15 @@ def login_view(request):
         return redirect('profile')
 
     form = AuthenticationForm(request, data=request.POST or None)
+
     if request.method == 'POST' and form.is_valid():
-        login(request, form.get_user())
+        user = form.get_user()
+
+        if not user.is_active:
+            messages.error(request, 'Please verify your email first.')
+            return redirect('verify_otp')
+
+        login(request, user)
         messages.success(request, 'Logged in successfully.')
         return redirect(request.GET.get('next') or 'profile')
 
@@ -178,11 +196,40 @@ def register_view(request):
         return redirect('profile')
 
     form = RegisterForm(request.POST or None)
+
     if request.method == 'POST' and form.is_valid():
-        user = form.save()
-        login(request, user)
-        messages.success(request, 'Account created successfully.')
-        return redirect('profile')
+        user = form.save(commit=False)
+        user.is_active = False
+        user.save()
+
+        otp = generate_otp()
+        store_otp(user.email, otp)
+    #     send_mail(
+    #     "OTP Verification",
+    #     f"Your OTP is {otp}",
+    #     settings.EMAIL_HOST_USER,
+    #     [email],
+    #     fail_silently=False
+    # )
+        html_content = render_to_string(
+        "emails/otp_email.html",
+        {"otp": otp}
+        )
+
+        email = EmailMultiAlternatives(
+        "Verify Your Account - BookMyShow Pro",
+        "",
+        settings.DEFAULT_FROM_EMAIL,
+        [user.email]
+    )
+
+        email.attach_alternative(html_content, "text/html")
+        email.send()
+
+        request.session['email'] = user.email
+
+        messages.success(request, 'OTP sent to your email.')
+        return redirect('verify_otp')
 
     return render(request, 'register.html', {'form': form})
 
@@ -206,7 +253,6 @@ def profile(request):
         'cancelled_bookings': cancelled_bookings,
         'total_spent': total_spent,
     })
-
 
 @login_required(login_url='login')
 def cancel_booking(request, booking_id):
@@ -232,3 +278,78 @@ def event_api(request):
     events = _apply_filters(Event.objects.all(), _event_filters(request))
     serializer = EventSerializer(events, many=True)
     return Response(serializer.data)
+
+def verify_otp(request):
+    email = request.session.get('email')
+
+    if request.method == "POST":
+        otp_entered = request.POST['otp']
+        real_otp = get_otp(email)
+
+        if real_otp and real_otp == otp_entered:
+            User = get_user_model()
+            user = User.objects.filter(email=email).order_by('-id').first()
+            if not user:
+                messages.error(request, "No account found for that email.")
+                return redirect('register')
+            user.is_active = True
+            user.save()
+
+            delete_otp(email)
+
+            messages.success(request, "Email verified successfully.")
+            return redirect('login')
+
+        return render(request, "verify_otp.html", {"error": "Invalid OTP"})
+
+    return render(request, "verify_otp.html")
+
+def resend_otp(request):
+    print("=== RESEND OTP CALLED ===")
+
+    email = request.session.get('email')
+    print("EMAIL:", email)
+
+    if not email:
+        print("NO EMAIL IN SESSION")
+        return redirect('register')
+
+    print("CAN RESEND:", can_resend(email))
+
+    if not can_resend(email):
+        print("BLOCKED")
+        return render(
+            request,
+            "verify_otp.html",
+            {"error": "Wait 30 seconds before resending OTP"}
+        )
+
+    otp = generate_otp()
+    store_otp(email, otp)
+
+    print("SENDING OTP:", otp)
+
+    html_content = render_to_string(
+    "emails/otp_email.html",
+    {"otp": otp}
+)
+
+    email = EmailMultiAlternatives(
+        "Verify Your Account - BookMyShow Pro",
+        "",
+        settings.DEFAULT_FROM_EMAIL,
+        [email]
+    )
+
+    email.attach_alternative(html_content, "text/html")
+    email.send()
+
+    set_resend_lock(email)
+
+    print("LOCK VALUE:", cache.get(f"resend_lock:{email}"))
+
+    return render(
+        request,
+        "verify_otp.html",
+        {"message": "OTP resent successfully"}
+    )

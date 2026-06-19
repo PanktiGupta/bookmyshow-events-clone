@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Verify OTP - BookMyShowPro{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+  <div class="auth-copy">
+    <p class="eyebrow">OTP verification</p>
+    <h1>Enter your one-time code.</h1>
+    <p>After verification you can book seats, pay, and track tickets from your profile.</p>
+  </div>
+
+  <form class="auth-card" method="post">
+    {% csrf_token %}
+    <h2>Verify OTP</h2>
+    {% if error %}<div class="field-error">{{ error }}</div>{% endif %}
+    {% if message %}<div class="message success">{{ message }}</div>{% endif %}
+    {% if identifier %}<div class="price-note">Code sent to <strong>{{ identifier }}</strong></div>{% endif %}
+    {% if dev_otp %}
+      <div class="price-note">Development OTP: <strong>{{ dev_otp }}</strong></div>
+    {% endif %}
+    <label>
+      OTP
+      <input class="form-control" type="text" name="otp" placeholder="Enter 6-digit OTP" maxlength="6">
+    </label>
+    <button class="btn" type="submit">Continue</button>
+    <p class="auth-note"><a href="{% url 'resend_otp' %}">Resend OTP</a></p>
+  </form>
+</section>
+{% endblock %}

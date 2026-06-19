@@ -16,7 +16,11 @@
         </div>
         <div>
             <span>Seats</span>
-            <strong>{{ booking.seats }}</strong>
+            <strong>{{ booking.seat_labels|default:booking.seats }}</strong>
+        </div>
+        <div>
+            <span>Payment</span>
+            <strong>{% if booking.payment %}{{ booking.payment.get_status_display }}{% else %}Pending{% endif %}</strong>
         </div>
         <div>
             <span>Total</span>

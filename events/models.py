@@ -3,7 +3,7 @@ from django.db import models
 from datetime import time
 from decimal import Decimal
 from django.core.validators import MaxValueValidator, MinValueValidator
-
+from django.contrib.auth.models import User
 class Event(models.Model):
     CATEGORY_CHOICES = [
         ('Music','Music'),
@@ -89,3 +89,8 @@ class Booking(models.Model):
     @property
     def transaction_id(self):
         return f'TXN{self.pk:06d}'
+
+class EmailOTP(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    otp = models.CharField(max_length=6)
+    created_at = models.DateTimeField(auto_now_add=True)

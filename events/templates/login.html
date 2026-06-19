@@ -8,8 +8,8 @@
 <div class="login-card">
 
     <div class="login-header">
-        <h1>🎟️ BookMyShowPro</h1>
-        <p>Login to continue booking amazing events</p>
+        <h1>BookMyShowPro</h1>
+        <p>Enter your email or phone to receive a one-time code.</p>
     </div>
 
     {% if form.non_field_errors %}
@@ -40,7 +40,7 @@
     </form>
 
     <p class="auth-note">
-        Don't have an account?
+        New here?
         <a href="{% url 'register' %}">
             Register
         </a>

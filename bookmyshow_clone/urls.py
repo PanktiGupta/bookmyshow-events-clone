@@ -1,3 +1,4 @@
+
 """
 URL configuration for bookmyshow_clone project.
 
@@ -36,6 +37,8 @@ urlpatterns = [
     path('login/', views.login_view, name='login'),
     path('register/', views.register_view, name='register'),
     path('logout/', views.logout_view, name='logout'),
+    path('verify-otp/', views.verify_otp, name='verify_otp'),
+    path('resend-otp/', views.resend_otp, name='resend_otp'),
     path('bookings/<int:booking_id>/cancel/', views.cancel_booking, name='cancel_booking'),
 
     # API

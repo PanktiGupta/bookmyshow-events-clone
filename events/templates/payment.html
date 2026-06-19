@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}Payment - BookMyShowPro{% endblock %}
+
+{% block content %}
+<section class="payment-layout">
+    <div class="payment-summary">
+        <p class="eyebrow">Secure checkout</p>
+        <h1>{{ booking.event.title }}</h1>
+        <div class="ticket">
+            <div><span>Seats</span><strong>{{ booking.seat_labels }}</strong></div>
+            <div><span>Tickets</span><strong>{{ booking.seats }}</strong></div>
+            <div><span>Price</span><strong>₹{{ booking.event.price }}</strong></div>
+            <div><span>Total</span><strong>₹{{ booking.total_amount }}</strong></div>
+        </div>
+        <p class="muted">Seats are held for 10 minutes while payment is completed.</p>
+    </div>
+
+    <form class="booking-form" method="post">
+        {% csrf_token %}
+        <h2>Payment method</h2>
+        {% for field in form %}
+            <label>
+                {{ field.label }}
+                {{ field }}
+                {% if field.errors %}
+                    <span class="field-error">{{ field.errors|join:", " }}</span>
+                {% endif %}
+            </label>
+        {% endfor %}
+        <button class="btn" type="submit">Pay ₹{{ booking.total_amount }}</button>
+    </form>
+</section>
+{% endblock %}

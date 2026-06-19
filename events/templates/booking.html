@@ -16,6 +16,35 @@
 
     <form class="booking-form" method="post">
         {% csrf_token %}
+        <h2>Select seats</h2>
+        <div class="screen-line">SCREEN</div>
+        <div class="seat-legend">
+            <span><i class="seat available"></i> Available</span>
+            <span><i class="seat locked"></i> Locked</span>
+            <span><i class="seat booked"></i> Booked</span>
+        </div>
+        <div class="seat-map">
+            {% regroup seat_map by row as rows %}
+            {% for row in rows %}
+                <div class="seat-row">
+                    <strong>{{ row.grouper }}</strong>
+                    <div>
+                        {% for seat in row.list %}
+                            <label class="seat-option {{ seat.status }}">
+                                <input
+                                    type="checkbox"
+                                    name="selected_seats"
+                                    value="{{ seat.label }}"
+                                    {% if seat.status != 'available' %}disabled{% endif %}
+                                >
+                                <span>{{ seat.number }}</span>
+                            </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+
         <h2>Customer details</h2>
         {% for field in form %}
             <label>
@@ -26,8 +55,8 @@
                 {% endif %}
             </label>
         {% endfor %}
-        <div class="price-note">Maximum 10 seats per booking. Available seats: {{ event.seats_available }}.</div>
-        <button class="btn" type="submit">Confirm booking</button>
+        <div class="price-note">Choose exact seats. Available seats: {{ event.seats_available }}. Booked: {{ booked_count }}.</div>
+        <button class="btn" type="submit">Reserve seats and pay</button>
     </form>
 </section>
 {% endblock %}

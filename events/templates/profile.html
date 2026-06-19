@@ -5,8 +5,8 @@
 <section class="profile-header">
     <div>
         <p class="eyebrow">My profile</p>
-        <h3>Hello, {{ request.user.username }}</h3>
-        <p>{{ request.user.email|default:"No email added" }}</p>
+        <h6>Hello, {{ request.user.get_full_name|default:request.user.email }}</h6>
+        <p>{{ request.user.email|default:"No email added" }}{% if request.user.phone %} • {{ request.user.phone }}{% endif %}</p>
     </div>
     <a class="btn secondary" href="{% url 'logout' %}">Logout</a>
 </section>
@@ -36,7 +36,7 @@
                 </div>
                 <div>
                     <span class="status confirmed">{{ booking.get_status_display }}</span>
-                    <p>{{ booking.seats }} seat{{ booking.seats|pluralize }}</p>
+                    <p>{{ booking.seat_labels|default:booking.seats }}</p>
                 </div>
                 <div>
                     <strong>₹{{ booking.total_amount }}</strong>
@@ -75,7 +75,7 @@
                 <span>{{ booking.transaction_id }}</span>
                 <span>{{ booking.event.title }}</span>
                 <span>{{ booking.booked_at|date:"M d, Y" }}</span>
-                <span>{{ booking.get_status_display }}</span>
+                <span>{% if booking.payment %}{{ booking.payment.get_status_display }}{% else %}{{ booking.get_status_display }}{% endif %}</span>
                 <strong>₹{{ booking.total_amount }}</strong>
             </div>
         {% empty %}

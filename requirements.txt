@@ -1,7 +1,14 @@
 asgiref==3.11.1
-Django==6.0.4
+certifi==2026.6.17
+charset-normalizer==3.4.7
+Django==5.2.15
+django-redis==7.0.0
 djangorestframework==3.17.1
-gunicorn==25.3.0
-packaging==26.0
+idna==3.18
+razorpay==2.0.1
+redis==8.0.0
+requests==2.34.2
 sqlparse==0.5.5
+typing_extensions==4.15.0
+urllib3==2.7.0
 whitenoise==6.12.0
