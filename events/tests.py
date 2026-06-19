@@ -57,7 +57,7 @@ class EventFlowTests(TestCase):
         )
 
         booking = Booking.objects.get()
-        self.event.refresh_from_db()
+        self.event.refresh_from_db(from_queryset=None)
 
         self.assertRedirects(response, reverse('booking_success', args=[booking.pk]))
         self.assertEqual(booking.total_amount, 2397)
