@@ -196,6 +196,9 @@ def login_view(request):
 
 
 def _send_otp_email(email, otp):
+    if not settings.OTP_EMAIL_ENABLED:
+        return False
+
     html_content = render_to_string(
         "emails/otp_email.html",
         {"otp": otp}
@@ -209,6 +212,7 @@ def _send_otp_email(email, otp):
     )
     message.attach_alternative(html_content, "text/html")
     message.send()
+    return True
 
 
 def register_view(request):
@@ -236,19 +240,32 @@ def register_view(request):
                 user.is_active = False
                 user.save()
                 store_otp(user_email, otp)
-                _send_otp_email(user_email, otp)
         except Exception:
-            logger.exception("Failed to send registration OTP to %s", user_email)
+            logger.exception("Failed to create registration for %s", user_email)
             form.add_error(
                 None,
-                'Could not send OTP email. Please check the email settings and try again.'
+                'Could not create your account. Please try again.'
             )
             delete_otp(user_email)
             return render(request, 'register.html', {'form': form})
 
+        try:
+            email_sent = _send_otp_email(user_email, otp)
+        except Exception:
+            logger.exception("Failed to send registration OTP to %s", user_email)
+            email_sent = False
+
+        if not email_sent:
+            request.session['dev_otp'] = otp
+        else:
+            request.session.pop('dev_otp', None)
+
         request.session['email'] = user_email
 
-        messages.success(request, 'OTP sent to your email.')
+        if email_sent:
+            messages.success(request, 'OTP sent to your email.')
+        else:
+            messages.info(request, 'Email OTP is not enabled. Use the OTP shown below to verify.')
         return redirect('verify_otp')
 
     return render(request, 'register.html', {'form': form})
@@ -301,6 +318,7 @@ def event_api(request):
 
 def verify_otp(request):
     email = request.session.get('email')
+    dev_otp = request.session.get('dev_otp')
 
     if request.method == "POST":
         otp_entered = request.POST['otp']
@@ -316,13 +334,14 @@ def verify_otp(request):
             user.save()
 
             delete_otp(email)
+            request.session.pop('dev_otp', None)
 
             messages.success(request, "Email verified successfully.")
             return redirect('login')
 
-        return render(request, "verify_otp.html", {"error": "Invalid OTP"})
+        return render(request, "verify_otp.html", {"error": "Invalid OTP", "dev_otp": dev_otp})
 
-    return render(request, "verify_otp.html")
+    return render(request, "verify_otp.html", {"identifier": email, "dev_otp": dev_otp})
 
 def resend_otp(request):
     print("=== RESEND OTP CALLED ===")
@@ -350,15 +369,15 @@ def resend_otp(request):
     print("SENDING OTP:", otp)
 
     try:
-        _send_otp_email(email, otp)
+        email_sent = _send_otp_email(email, otp)
     except Exception:
         logger.exception("Failed to resend OTP to %s", email)
-        delete_otp(email)
-        return render(
-            request,
-            "verify_otp.html",
-            {"error": "Could not send OTP email. Please check the email settings and try again."}
-        )
+        email_sent = False
+
+    if not email_sent:
+        request.session['dev_otp'] = otp
+    else:
+        request.session.pop('dev_otp', None)
 
     set_resend_lock(email)
 
@@ -367,5 +386,9 @@ def resend_otp(request):
     return render(
         request,
         "verify_otp.html",
-        {"message": "OTP resent successfully"}
+        {
+            "message": "OTP resent successfully" if email_sent else "Email OTP is not enabled. Use the OTP shown below.",
+            "identifier": email,
+            "dev_otp": None if email_sent else otp,
+        }
     )

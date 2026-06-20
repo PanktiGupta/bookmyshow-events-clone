@@ -138,6 +138,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+OTP_EMAIL_ENABLED = config("OTP_EMAIL_ENABLED", default=False, cast=bool)
 DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL",
     default=EMAIL_HOST_USER or "noreply@bookmyshow-clone.local",
@@ -146,13 +147,14 @@ EMAIL_BACKEND = config(
     "EMAIL_BACKEND",
     default=(
         "django.core.mail.backends.smtp.EmailBackend"
-        if EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
+        if OTP_EMAIL_ENABLED and EMAIL_HOST_USER and EMAIL_HOST_PASSWORD
         else "django.core.mail.backends.console.EmailBackend"
     ),
 )
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+EMAIL_TIMEOUT = config("EMAIL_TIMEOUT", default=8, cast=int)
 
 
 STATIC_URL = '/static/'
