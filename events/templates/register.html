@@ -12,6 +12,9 @@
     <form class="auth-card" method="post">
         {% csrf_token %}
         <h2>Register</h2>
+        {% if form.non_field_errors %}
+            <div class="field-error">{{ form.non_field_errors|join:", " }}</div>
+        {% endif %}
         {% for field in form %}
             <label>
                 {{ field.label }}

@@ -1,9 +1,13 @@
 
+import logging
+
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q, Sum
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.conf import settings
@@ -16,9 +20,9 @@ from django.contrib.auth import get_user_model
 from .utils import generate_otp, store_otp, set_resend_lock, can_resend
 from .utils import get_otp, delete_otp
 from .serializers import EventSerializer
-from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 User = get_user_model()
+logger = logging.getLogger(__name__)
 
 def _wishlist(request):
     return [int(event_id) for event_id in request.session.get('wishlist', [])]
@@ -191,42 +195,58 @@ def login_view(request):
     return render(request, 'login.html', {'form': form})
 
 
+def _send_otp_email(email, otp):
+    html_content = render_to_string(
+        "emails/otp_email.html",
+        {"otp": otp}
+    )
+
+    message = EmailMultiAlternatives(
+        "Verify Your Account - BookMyShow Pro",
+        "",
+        settings.DEFAULT_FROM_EMAIL,
+        [email]
+    )
+    message.attach_alternative(html_content, "text/html")
+    message.send()
+
+
 def register_view(request):
     if request.user.is_authenticated:
         return redirect('profile')
 
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        if username or email:
+            User.objects.filter(
+                Q(username=username) | Q(email=email),
+                is_active=False,
+            ).delete()
+
     form = RegisterForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
-        user = form.save(commit=False)
-        user.is_active = False
-        user.save()
-
         otp = generate_otp()
-        store_otp(user.email, otp)
-    #     send_mail(
-    #     "OTP Verification",
-    #     f"Your OTP is {otp}",
-    #     settings.EMAIL_HOST_USER,
-    #     [email],
-    #     fail_silently=False
-    # )
-        html_content = render_to_string(
-        "emails/otp_email.html",
-        {"otp": otp}
-        )
+        user_email = form.cleaned_data['email']
 
-        email = EmailMultiAlternatives(
-        "Verify Your Account - BookMyShow Pro",
-        "",
-        settings.DEFAULT_FROM_EMAIL,
-        [user.email]
-    )
+        try:
+            with transaction.atomic():
+                user = form.save(commit=False)
+                user.is_active = False
+                user.save()
+                store_otp(user_email, otp)
+                _send_otp_email(user_email, otp)
+        except Exception:
+            logger.exception("Failed to send registration OTP to %s", user_email)
+            form.add_error(
+                None,
+                'Could not send OTP email. Please check the email settings and try again.'
+            )
+            delete_otp(user_email)
+            return render(request, 'register.html', {'form': form})
 
-        email.attach_alternative(html_content, "text/html")
-        email.send()
-
-        request.session['email'] = user.email
+        request.session['email'] = user_email
 
         messages.success(request, 'OTP sent to your email.')
         return redirect('verify_otp')
@@ -329,20 +349,16 @@ def resend_otp(request):
 
     print("SENDING OTP:", otp)
 
-    html_content = render_to_string(
-    "emails/otp_email.html",
-    {"otp": otp}
-)
-
-    email = EmailMultiAlternatives(
-        "Verify Your Account - BookMyShow Pro",
-        "",
-        settings.DEFAULT_FROM_EMAIL,
-        [email]
-    )
-
-    email.attach_alternative(html_content, "text/html")
-    email.send()
+    try:
+        _send_otp_email(email, otp)
+    except Exception:
+        logger.exception("Failed to resend OTP to %s", email)
+        delete_otp(email)
+        return render(
+            request,
+            "verify_otp.html",
+            {"error": "Could not send OTP email. Please check the email settings and try again."}
+        )
 
     set_resend_lock(email)
 
