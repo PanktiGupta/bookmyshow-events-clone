@@ -265,7 +265,7 @@ def register_view(request):
         if email_sent:
             messages.success(request, 'OTP sent to your email.')
         else:
-            messages.info(request, 'Email OTP is not enabled. Use the OTP shown below to verify.')
+            messages.info(request, 'Email OTP is not configured on the server. Use the OTP shown below to verify.')
         return redirect('verify_otp')
 
     return render(request, 'register.html', {'form': form})
@@ -387,7 +387,7 @@ def resend_otp(request):
         request,
         "verify_otp.html",
         {
-            "message": "OTP resent successfully" if email_sent else "Email OTP is not enabled. Use the OTP shown below.",
+            "message": "OTP resent successfully" if email_sent else "Email OTP is not configured on the server. Use the OTP shown below.",
             "identifier": email,
             "dev_otp": None if email_sent else otp,
         }

@@ -138,7 +138,11 @@ DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
 EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
-OTP_EMAIL_ENABLED = config("OTP_EMAIL_ENABLED", default=False, cast=bool)
+OTP_EMAIL_ENABLED = config(
+    "OTP_EMAIL_ENABLED",
+    default=bool(EMAIL_HOST_USER and EMAIL_HOST_PASSWORD),
+    cast=bool,
+)
 DEFAULT_FROM_EMAIL = config(
     "DEFAULT_FROM_EMAIL",
     default=EMAIL_HOST_USER or "noreply@bookmyshow-clone.local",
