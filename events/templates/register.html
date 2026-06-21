@@ -4,28 +4,41 @@
 {% block content %}
 <section class="auth-layout">
     <div class="auth-copy">
-        <p class="eyebrow">Create profile</p>
         <h1>Start booking with OTP access.</h1>
         <p>Your email and phone keep bookings, transactions and cancelled tickets connected to you.</p>
     </div>
-
-    <form class="auth-card" method="post">
+    <form class="auth-card register-card" method="post">
         {% csrf_token %}
+
         <h2>Register</h2>
+
         {% if form.non_field_errors %}
-            <div class="field-error">{{ form.non_field_errors|join:", " }}</div>
+            <div class="field-error">
+                {{ form.non_field_errors|join:", " }}
+            </div>
         {% endif %}
+
         {% for field in form %}
-            <label>
-                {{ field.label }}
+            <div class="form-group">
+                <label>{{ field.label }}</label>
                 {{ field }}
+
                 {% if field.errors %}
-                    <span class="field-error">{{ field.errors|join:", " }}</span>
+                    <div class="field-error">
+                        {{ field.errors|join:", " }}
+                    </div>
                 {% endif %}
-            </label>
+            </div>
         {% endfor %}
-        <button class="btn" type="submit">Send OTP</button>
-        <p class="auth-note">Already registered? <a href="{% url 'login' %}">Get OTP</a></p>
+
+        <button class="btn register-btn" type="submit">
+            Send OTP
+        </button>
+
+        <p class="auth-note">
+            Already registered?
+            <a href="{% url 'login' %}">Login</a>
+        </p>
     </form>
 </section>
 {% endblock %}

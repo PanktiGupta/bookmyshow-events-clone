@@ -1,6 +1,5 @@
 
 import logging
-
 from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -68,7 +67,7 @@ def _catalog_context(request, events):
         'events': events,
         'wishlist': wishlist,
         'categories': Event.CATEGORY_CHOICES,
-        'cities': Event.objects.order_by('city').values_list('city', flat=True).distinct(),
+        'cities': Event.objects.order_by('city').values_list('city', flat=True).distinct().order_by('city'),
         'filters': _event_filters(request),
     }
 
@@ -222,12 +221,11 @@ def register_view(request):
     if request.method == 'POST':
         username = request.POST.get('username', '').strip()
         email = request.POST.get('email', '').strip()
-        if username or email:
-            User.objects.filter(
-                Q(username=username) | Q(email=email),
-                is_active=False,
-            ).delete()
-
+        # if username or email:
+        #     User.objects.filter(
+        #         Q(username=username) | Q(email=email),
+        #         is_active=False,
+        #     ).delete()
     form = RegisterForm(request.POST or None)
 
     if request.method == 'POST' and form.is_valid():
